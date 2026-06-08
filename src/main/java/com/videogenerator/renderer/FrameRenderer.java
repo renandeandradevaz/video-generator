@@ -23,8 +23,9 @@ public class FrameRenderer {
     private final Font optionsFont;
 
     private static final Color BG_OVERLAY = new Color(0, 0, 0, 180);
-    private static final Color OPTION_BG = new Color(255, 255, 255, 40);
-    private static final Color OPTION_BORDER = new Color(255, 255, 255, 100);
+    private static final Color OPTION_BG = new Color(0, 0, 0, 80);
+    private static final Color OPTION_BORDER = new Color(255, 255, 255, 60);
+    private static final Color OPTION_SHADOW = new Color(0, 0, 0, 80);
     private static final Color CORRECT_BG = new Color(46, 204, 113, 200);
     private static final Color CORRECT_BORDER = new Color(39, 174, 96);
     private static final Color WRONG_BG = new Color(231, 76, 60, 120);
@@ -75,21 +76,18 @@ public class FrameRenderer {
 
         if ("find-the-error".equals(question.getType())) {
             drawBackground(g, "background-3.jpg");
-            drawOverlay(g);
 
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, false);
         } else if ("who-is-the-character".equals(question.getType())) {
             drawBackground(g, "background-2.jpg");
-            drawOverlay(g);
 
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawCenteredImage(g, question.getSilhouetteImage());
         } else {
             drawBackground(g, "background.jpg");
-            drawOverlay(g);
 
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
@@ -108,21 +106,18 @@ public class FrameRenderer {
 
         if ("find-the-error".equals(question.getType())) {
             drawBackground(g, "background-3.jpg");
-            drawOverlay(g);
 
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, true);
         } else if ("who-is-the-character".equals(question.getType())) {
             drawBackground(g, "background-2.jpg");
-            drawOverlay(g);
 
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawCenteredImage(g, question.getRevealImage());
         } else {
             drawBackground(g, "background.jpg");
-            drawOverlay(g);
 
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
@@ -321,11 +316,16 @@ public class FrameRenderer {
                 borderColor = OPTION_BORDER;
             }
 
+            int shadowOff = scale(4);
+            RoundRectangle2D shadow = new RoundRectangle2D.Double(startX + shadowOff, y + shadowOff, optionWidth, optionHeight, scale(15), scale(15));
+            g.setColor(OPTION_SHADOW);
+            g.fill(shadow);
+
             RoundRectangle2D rect = new RoundRectangle2D.Double(startX, y, optionWidth, optionHeight, scale(15), scale(15));
             g.setColor(bgColor);
             g.fill(rect);
             g.setColor(borderColor);
-            g.setStroke(new BasicStroke(scale(3)));
+            g.setStroke(new BasicStroke(scale(2)));
             g.draw(rect);
 
             FontMetrics fm = g.getFontMetrics();
