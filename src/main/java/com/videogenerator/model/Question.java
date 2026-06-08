@@ -3,10 +3,18 @@ package com.videogenerator.model;
 import java.util.List;
 
 public class Question {
+    private String type;
     private String text;
     private String image;
     private List<String> options;
     private int correctIndex;
+    private String correctImage;
+    private String incorrectImage;
+    private Integer repetitions;
+
+    public String getType() {
+        return type == null ? "quiz" : type;
+    }
 
     public String getText() {
         return text;
@@ -22,5 +30,17 @@ public class Question {
 
     public int getCorrectIndex() {
         return correctIndex;
+    }
+
+    public String getCorrectImage() {
+        return correctImage;
+    }
+
+    public String getIncorrectImage() {
+        return incorrectImage;
+    }
+
+    public int getRepetitions() {
+        return repetitions == null ? 6 : repetitions;
     }
 }

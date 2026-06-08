@@ -7,60 +7,84 @@
   "answerRevealDurationSeconds": 3,
   "questions": [
     {
+      "type": "quiz",
       "text": "Qual é o nome do jutsu mais icônico de Naruto Uzumaki?",
       "image": "question_01.jpg",
       "options": ["Chidori", "Rasengan", "Amaterasu", "Byakugan"],
       "correctIndex": 1
     },
     {
+      "type": "quiz",
       "text": "Quem foi o sensei do Time 7?",
       "image": "question_02.jpg",
       "options": ["Jiraiya", "Iruka", "Kakashi Hatake", "Asuma"],
       "correctIndex": 2
     },
     {
+      "type": "quiz",
       "text": "Qual é o nome da besta de cauda selada dentro de Naruto?",
       "image": "question_03.jpg",
       "options": ["Shukaku", "Kurama", "Matatabi", "Gyūki"],
       "correctIndex": 1
     },
     {
+      "type": "quiz",
       "text": "Qual clã possui o Sharingan?",
       "image": "question_04.jpg",
       "options": ["Clã Hyūga", "Clã Senju", "Clã Uchiha", "Clã Uzumaki"],
       "correctIndex": 2
     },
     {
+      "type": "quiz",
       "text": "Quem é o fundador da Vila da Folha (Konoha)?",
       "image": "question_05.jpg",
       "options": ["Madara Uchiha", "Tobirama Senju", "Hiruzen Sarutobi", "Hashirama Senju"],
       "correctIndex": 3
     },
     {
+      "type": "find-the-error",
+      "text": "Encontre a imagem diferente!",
+      "correctImage": "correct_01.jpg",
+      "incorrectImage": "incorrect_01.jpg",
+      "repetitions": 49
+    },
+    {
+      "type": "quiz",
       "text": "Qual é o nome verdadeiro do vilão mascarado Tobi?",
       "image": "question_06.jpg",
       "options": ["Madara Uchiha", "Obito Uchiha", "Itachi Uchiha", "Shisui Uchiha"],
       "correctIndex": 1
     },
     {
+      "type": "quiz",
       "text": "Qual é o sonho de Naruto desde criança?",
       "image": "question_07.jpg",
       "options": ["Ser o ninja mais forte", "Tornar-se Hokage", "Derrotar Sasuke", "Encontrar seus pais"],
       "correctIndex": 1
     },
     {
+      "type": "quiz",
       "text": "Quem ensinou o Rasengan para Naruto?",
       "image": "question_08.jpg",
       "options": ["Kakashi", "Minato", "Jiraiya", "Iruka"],
       "correctIndex": 2
     },
     {
+      "type": "quiz",
       "text": "Qual é o nome da organização criminosa que caça os Jinchūriki?",
       "image": "question_09.jpg",
       "options": ["ANBU", "Akatsuki", "Os Sannin", "Raiz"],
       "correctIndex": 1
     },
     {
+      "type": "find-the-error",
+      "text": "Qual imagem é diferente das outras?",
+      "correctImage": "correct_02.jpg",
+      "incorrectImage": "incorrect_02.jpg",
+      "repetitions": 9
+    },
+    {
+      "type": "quiz",
       "text": "Qual é o nome da técnica que Sasuke aprendeu com Orochimaru?",
       "image": "question_10.jpg",
       "options": ["Rasengan", "Selo Amaldiçoado", "Kirin", "Chidori"],

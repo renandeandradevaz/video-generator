@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class FrameRenderer {
 
@@ -43,33 +44,51 @@ public class FrameRenderer {
     }
 
     public BufferedImage renderQuestionFrame(Question question, int questionNumber, int totalQuestions,
-                                             double secondsRemaining, int totalSeconds) {
+                                             double secondsRemaining, int totalSeconds, int questionIndex) {
         BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = frame.createGraphics();
         setupRenderingHints(g);
 
-        drawBackground(g, question.getImage());
-        drawOverlay(g);
-        drawHeader(g, questionNumber, totalQuestions);
-        drawTimer(g, secondsRemaining, totalSeconds);
-        drawQuestionText(g, question.getText());
-        drawOptions(g, question.getOptions(), -1);
+        if ("find-the-error".equals(question.getType())) {
+            drawSolidBackground(g);
+            drawOverlay(g);
+            drawHeader(g, questionNumber, totalQuestions);
+            drawTimer(g, secondsRemaining, totalSeconds);
+            drawQuestionText(g, question.getText());
+            drawImageGrid(g, question, questionIndex, false);
+        } else {
+            drawBackground(g, question.getImage());
+            drawOverlay(g);
+            drawHeader(g, questionNumber, totalQuestions);
+            drawTimer(g, secondsRemaining, totalSeconds);
+            drawQuestionText(g, question.getText());
+            drawOptions(g, question.getOptions(), -1);
+        }
 
         g.dispose();
         return frame;
     }
 
-    public BufferedImage renderAnswerFrame(Question question, int questionNumber, int totalQuestions) {
+    public BufferedImage renderAnswerFrame(Question question, int questionNumber, int totalQuestions, int questionIndex) {
         BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = frame.createGraphics();
         setupRenderingHints(g);
 
-        drawBackground(g, question.getImage());
-        drawOverlay(g);
-        drawHeader(g, questionNumber, totalQuestions);
-        drawTimerFinished(g);
-        drawQuestionText(g, question.getText());
-        drawOptions(g, question.getOptions(), question.getCorrectIndex());
+        if ("find-the-error".equals(question.getType())) {
+            drawSolidBackground(g);
+            drawOverlay(g);
+            drawHeader(g, questionNumber, totalQuestions);
+            drawTimerFinished(g);
+            drawQuestionText(g, question.getText());
+            drawImageGrid(g, question, questionIndex, true);
+        } else {
+            drawBackground(g, question.getImage());
+            drawOverlay(g);
+            drawHeader(g, questionNumber, totalQuestions);
+            drawTimerFinished(g);
+            drawQuestionText(g, question.getText());
+            drawOptions(g, question.getOptions(), question.getCorrectIndex());
+        }
 
         g.dispose();
         return frame;
@@ -284,6 +303,86 @@ public class FrameRenderer {
             lines.add(currentLine.toString());
         }
         return lines;
+    }
+
+    private void drawSolidBackground(Graphics2D g) {
+        g.setColor(new Color(30, 30, 60));
+        g.fillRect(0, 0, width, height);
+    }
+
+    private void drawImageGrid(Graphics2D g, Question question, int questionIndex, boolean showAnswer) {
+        int total = question.getRepetitions();
+        int cols = (int) Math.ceil(Math.sqrt(total));
+        int rows = (int) Math.ceil((double) total / cols);
+
+        Random rand = new Random(questionIndex * 31L + 7);
+        int incorrectPos = rand.nextInt(total);
+
+        int gridTop = scale(310);
+        int gridBottom = height - scale(110);
+        int gridLeft = scale(100);
+        int gridRight = width - scale(100);
+
+        int availableWidth = gridRight - gridLeft;
+        int availableHeight = gridBottom - gridTop;
+
+        int gap = scale(12);
+        int cellWidth = (availableWidth - gap * (cols - 1)) / cols;
+        int cellHeight = (availableHeight - gap * (rows - 1)) / rows;
+        int imgSize = Math.min(cellWidth, cellHeight);
+
+        int totalGridWidth = cols * imgSize + (cols - 1) * gap;
+        int totalGridHeight = rows * imgSize + (rows - 1) * gap;
+        int offsetX = gridLeft + (availableWidth - totalGridWidth) / 2;
+        int offsetY = gridTop + (availableHeight - totalGridHeight) / 2;
+
+        BufferedImage correctImg = loadImage(question.getCorrectImage());
+        BufferedImage incorrectImg = loadImage(question.getIncorrectImage());
+
+        for (int i = 0; i < total; i++) {
+            int row = i / cols;
+            int col = i % cols;
+            int x = offsetX + col * (imgSize + gap);
+            int y = offsetY + row * (imgSize + gap);
+
+            boolean isIncorrect = (i == incorrectPos);
+            BufferedImage img = isIncorrect ? incorrectImg : correctImg;
+
+            if (showAnswer && !isIncorrect) {
+                Composite original = g.getComposite();
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
+                drawScaledImage(g, img, x, y, imgSize, imgSize);
+                g.setComposite(original);
+                g.setColor(OPTION_BORDER);
+                g.setStroke(new BasicStroke(scale(2)));
+                g.draw(new RoundRectangle2D.Double(x, y, imgSize, imgSize, scale(10), scale(10)));
+            } else if (showAnswer && isIncorrect) {
+                int zoom = scale(8);
+                drawScaledImage(g, img, x - zoom, y - zoom, imgSize + zoom * 2, imgSize + zoom * 2);
+                g.setColor(CORRECT_BG);
+                g.setStroke(new BasicStroke(scale(5)));
+                g.draw(new RoundRectangle2D.Double(x - zoom, y - zoom, imgSize + zoom * 2, imgSize + zoom * 2, scale(12), scale(12)));
+            } else {
+                drawScaledImage(g, img, x, y, imgSize, imgSize);
+                g.setColor(OPTION_BORDER);
+                g.setStroke(new BasicStroke(scale(2)));
+                g.draw(new RoundRectangle2D.Double(x, y, imgSize, imgSize, scale(10), scale(10)));
+            }
+        }
+    }
+
+    private void drawScaledImage(Graphics2D g, BufferedImage img, int x, int y, int w, int h) {
+        if (img != null) {
+            g.drawImage(img, x, y, w, h, null);
+        } else {
+            g.setColor(new Color(80, 80, 120));
+            g.fill(new RoundRectangle2D.Double(x, y, w, h, scale(10), scale(10)));
+            g.setFont(new Font("SansSerif", Font.BOLD, scale(20)));
+            FontMetrics fm = g.getFontMetrics();
+            String text = "?";
+            g.setColor(TEXT_WHITE);
+            g.drawString(text, x + (w - fm.stringWidth(text)) / 2, y + (h + fm.getAscent()) / 2);
+        }
     }
 
     private int scale(int value) {

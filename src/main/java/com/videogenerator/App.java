@@ -66,14 +66,14 @@ public class App {
                     double secondsRemaining = (double) (questionFrames - f) / fps;
                     BufferedImage frame = renderer.renderQuestionFrame(
                             question, questionNum, totalQuestions,
-                            secondsRemaining, quiz.getQuestionDurationSeconds()
+                            secondsRemaining, quiz.getQuestionDurationSeconds(), q
                     );
                     encoder.writeFrame(frame);
                     frameCount++;
                 }
 
                 for (int f = 0; f < answerFrames; f++) {
-                    BufferedImage frame = renderer.renderAnswerFrame(question, questionNum, totalQuestions);
+                    BufferedImage frame = renderer.renderAnswerFrame(question, questionNum, totalQuestions, q);
                     encoder.writeFrame(frame);
                     frameCount++;
                 }

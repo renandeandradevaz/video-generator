@@ -37,7 +37,77 @@ public class ImageGenerator {
             ImageIO.write(img, "jpg", output);
             System.out.println("Gerada: " + output.getName());
         }
+
+        generateFindTheErrorPairs(outputDir);
+
         System.out.println("Imagens geradas em: " + outputDir.getAbsolutePath());
+    }
+
+    private static void generateFindTheErrorPairs(File outputDir) throws IOException {
+        // Pair 1: circles pattern - incorrect has a square instead of a circle
+        generatePair(outputDir, 1, PALETTES[0], PALETTES[1]);
+        // Pair 2: stars pattern - incorrect has different colored star
+        generatePair(outputDir, 2, PALETTES[4], PALETTES[6]);
+        System.out.println();
+    }
+
+    private static void generatePair(File outputDir, int pairIndex, Color[] palette, Color[] altPalette) throws IOException {
+        BufferedImage correct = generateFindErrorImage(pairIndex, palette, false);
+        BufferedImage incorrect = generateFindErrorImage(pairIndex, palette, true);
+
+        File correctFile = new File(outputDir, String.format("correct_%02d.jpg", pairIndex));
+        File incorrectFile = new File(outputDir, String.format("incorrect_%02d.jpg", pairIndex));
+        ImageIO.write(correct, "jpg", correctFile);
+        ImageIO.write(incorrect, "jpg", incorrectFile);
+        System.out.println("Par gerado: " + correctFile.getName() + " / " + incorrectFile.getName());
+    }
+
+    private static BufferedImage generateFindErrorImage(int seed, Color[] palette, boolean withError) {
+        BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        GradientPaint gradient = new GradientPaint(0, 0, palette[0], WIDTH, HEIGHT, palette[1]);
+        g.setPaint(gradient);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+
+        Random rand = new Random(seed * 99L);
+
+        for (int i = 0; i < 6; i++) {
+            int cx = 200 + rand.nextInt(WIDTH - 400);
+            int cy = 200 + rand.nextInt(HEIGHT - 400);
+            int size = 80 + rand.nextInt(120);
+
+            g.setColor(new Color(255, 255, 255, 50 + rand.nextInt(40)));
+
+            if (withError && i == 3) {
+                g.fillRect(cx - size / 2, cy - size / 2, size, size);
+            } else {
+                g.fill(new Ellipse2D.Double(cx - size / 2, cy - size / 2, size, size));
+            }
+        }
+
+        int centerSize = 150;
+        int cx = WIDTH / 2;
+        int cy = HEIGHT / 2;
+
+        if (withError) {
+            g.setColor(new Color(231, 76, 60, 180));
+        } else {
+            g.setColor(new Color(46, 204, 113, 180));
+        }
+        drawStar(g, cx, cy, centerSize, new Random(seed));
+
+        g.setColor(new Color(255, 255, 255, 30));
+        g.setStroke(new BasicStroke(3));
+        for (int i = 0; i < 4; i++) {
+            int x1 = rand.nextInt(WIDTH);
+            int y1 = rand.nextInt(HEIGHT);
+            g.drawLine(x1, y1, x1 + rand.nextInt(300) - 150, y1 + rand.nextInt(300) - 150);
+        }
+
+        g.dispose();
+        return img;
     }
 
     private static BufferedImage generateImage(int seed, Color[] palette) {

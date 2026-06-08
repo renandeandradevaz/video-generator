@@ -1,5 +1,9 @@
-# MacOS
 .DS_Store
 
-# Ignorar em qualquer pasta
+dependency-reduced-pom.xml
+
 **/.DS_Store
+
+images/
+output/
+target/
