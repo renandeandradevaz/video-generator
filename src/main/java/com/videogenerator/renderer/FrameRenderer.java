@@ -60,7 +60,7 @@ public class FrameRenderer {
     }
 
     private Font title(int size) {
-        return titleFont.deriveFont(Font.BOLD, (float) size);
+        return titleFont.deriveFont(Font.PLAIN, (float) size);
     }
 
     private Font options(int size) {
@@ -81,11 +81,12 @@ public class FrameRenderer {
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, false);
         } else if ("who-is-the-character".equals(question.getType())) {
-            drawBackground(g, question.getSilhouetteImage());
+            drawBackground(g, "background-2.jpg");
             drawOverlay(g);
 
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
+            drawCenteredImage(g, question.getSilhouetteImage());
         } else {
             drawBackground(g, "background.jpg");
             drawOverlay(g);
@@ -113,11 +114,12 @@ public class FrameRenderer {
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, true);
         } else if ("who-is-the-character".equals(question.getType())) {
-            drawBackground(g, question.getRevealImage());
+            drawBackground(g, "background-2.jpg");
             drawOverlay(g);
 
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
+            drawCenteredImage(g, question.getRevealImage());
         } else {
             drawBackground(g, "background.jpg");
             drawOverlay(g);
@@ -194,7 +196,7 @@ public class FrameRenderer {
         g.setColor(fillColor);
         g.fill(new RoundRectangle2D.Double(barX, barY, fillWidth, barHeight, arcSize, arcSize));
 
-        g.setFont(title(scale(36)));
+        g.setFont(new Font("SansSerif", Font.BOLD, scale(36)));
         String timerText = String.valueOf((int) Math.ceil(secondsRemaining));
         FontMetrics fm = g.getFontMetrics();
         int timerX = (width - fm.stringWidth(timerText)) / 2;
@@ -216,7 +218,7 @@ public class FrameRenderer {
         g.setColor(TIMER_BAR_BG);
         g.fill(new RoundRectangle2D.Double(barX, barY, barWidth, barHeight, arcSize, arcSize));
 
-        g.setFont(title(scale(36)));
+        g.setFont(new Font("SansSerif", Font.BOLD, scale(36)));
         String timerText = "✓";
         FontMetrics fm = g.getFontMetrics();
         int timerX = (width - fm.stringWidth(timerText)) / 2;
@@ -237,7 +239,7 @@ public class FrameRenderer {
         g.setColor(QUESTION_BOX_BG);
         g.fill(new RoundRectangle2D.Double(boxX, boxY, boxWidth, boxHeight, arcSize, arcSize));
 
-        g.setFont(title(scale(36)));
+        g.setFont(title(scale(42)));
         FontMetrics fm = g.getFontMetrics();
 
         List<String> lines = wrapText(text, fm, boxWidth - padding * 2);
@@ -345,6 +347,37 @@ public class FrameRenderer {
         }
 
         return startX + optionWidth + scale(25);
+    }
+
+    private void drawCenteredImage(Graphics2D g, String imageName) {
+        BufferedImage img = loadImage(imageName);
+        int areaTop = scale(310);
+        int areaBottom = height - scale(140);
+        int areaLeft = scale(100);
+        int areaRight = width - scale(100);
+        int areaW = areaRight - areaLeft;
+        int areaH = areaBottom - areaTop;
+
+        if (img != null) {
+            double scaleX = (double) areaW / img.getWidth();
+            double scaleY = (double) areaH / img.getHeight();
+            double sc = Math.min(scaleX, scaleY);
+            int scaledW = (int) (img.getWidth() * sc);
+            int scaledH = (int) (img.getHeight() * sc);
+            int x = areaLeft + (areaW - scaledW) / 2;
+            int y = areaTop + (areaH - scaledH) / 2;
+            int arcSize = scale(15);
+
+            Shape clip = new RoundRectangle2D.Double(x, y, scaledW, scaledH, arcSize, arcSize);
+            Shape oldClip = g.getClip();
+            g.setClip(clip);
+            g.drawImage(img, x, y, scaledW, scaledH, null);
+            g.setClip(oldClip);
+
+            g.setColor(OPTION_BORDER);
+            g.setStroke(new BasicStroke(scale(3)));
+            g.draw(new RoundRectangle2D.Double(x, y, scaledW, scaledH, arcSize, arcSize));
+        }
     }
 
     private BufferedImage loadImage(String imageName) {
