@@ -4,6 +4,6 @@ dependency-reduced-pom.xml
 
 **/.DS_Store
 
-#images/
+images/
 output/
 target/
