@@ -11,6 +11,8 @@ public class Question {
     private String correctImage;
     private String incorrectImage;
     private Integer repetitions;
+    private String silhouetteImage;
+    private String revealImage;
 
     public String getType() {
         return type == null ? "quiz" : type;
@@ -42,5 +44,13 @@ public class Question {
 
     public int getRepetitions() {
         return repetitions == null ? 6 : repetitions;
+    }
+
+    public String getSilhouetteImage() {
+        return silhouetteImage;
+    }
+
+    public String getRevealImage() {
+        return revealImage;
     }
 }

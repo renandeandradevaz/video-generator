@@ -56,6 +56,12 @@ public class FrameRenderer {
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, false);
+        } else if ("who-is-the-character".equals(question.getType())) {
+            drawBackground(g, question.getSilhouetteImage());
+            drawOverlay(g);
+            drawHeader(g, questionNumber, totalQuestions);
+            drawTimer(g, secondsRemaining, totalSeconds);
+            drawQuestionText(g, question.getText());
         } else {
             drawBackground(g, question.getImage());
             drawOverlay(g);
@@ -81,6 +87,12 @@ public class FrameRenderer {
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, true);
+        } else if ("who-is-the-character".equals(question.getType())) {
+            drawBackground(g, question.getRevealImage());
+            drawOverlay(g);
+            drawHeader(g, questionNumber, totalQuestions);
+            drawTimerFinished(g);
+            drawQuestionText(g, question.getText());
         } else {
             drawBackground(g, question.getImage());
             drawOverlay(g);

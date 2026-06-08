@@ -39,6 +39,7 @@ public class ImageGenerator {
         }
 
         generateFindTheErrorPairs(outputDir);
+        generateWhoIsTheCharacterPairs(outputDir);
 
         System.out.println("Imagens geradas em: " + outputDir.getAbsolutePath());
     }
@@ -149,6 +150,107 @@ public class ImageGenerator {
 
         g.dispose();
         return img;
+    }
+
+    private static void generateWhoIsTheCharacterPairs(File outputDir) throws IOException {
+        generateCharacterPair(outputDir, 1, PALETTES[2], 5);
+        generateCharacterPair(outputDir, 2, PALETTES[5], 6);
+        System.out.println();
+    }
+
+    private static void generateCharacterPair(File outputDir, int index, Color[] palette, int starPoints) throws IOException {
+        BufferedImage reveal = generateCharacterImage(index, palette, starPoints, false);
+        BufferedImage silhouette = generateCharacterImage(index, palette, starPoints, true);
+
+        File revealFile = new File(outputDir, String.format("reveal_%02d.jpg", index));
+        File silhouetteFile = new File(outputDir, String.format("silhouette_%02d.jpg", index));
+        ImageIO.write(reveal, "jpg", revealFile);
+        ImageIO.write(silhouette, "jpg", silhouetteFile);
+        System.out.println("Par gerado: " + silhouetteFile.getName() + " / " + revealFile.getName());
+    }
+
+    private static BufferedImage generateCharacterImage(int seed, Color[] palette, int starPoints, boolean asSilhouette) {
+        BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        if (asSilhouette) {
+            g.setColor(new Color(15, 15, 25));
+            g.fillRect(0, 0, WIDTH, HEIGHT);
+        } else {
+            GradientPaint gradient = new GradientPaint(0, 0, palette[0], WIDTH, HEIGHT, palette[1]);
+            g.setPaint(gradient);
+            g.fillRect(0, 0, WIDTH, HEIGHT);
+        }
+
+        Random rand = new Random(seed * 77L);
+
+        // "body" - large ellipse
+        int bodyX = WIDTH / 2;
+        int bodyY = HEIGHT / 2 + 100;
+        int bodyW = 300;
+        int bodyH = 400;
+
+        // "head" - circle on top
+        int headX = WIDTH / 2;
+        int headY = HEIGHT / 2 - 150;
+        int headSize = 200;
+
+        // star "accessory"
+        int starX = WIDTH / 2 + 120;
+        int starY = HEIGHT / 2 - 220;
+        int starSize = 60;
+
+        if (asSilhouette) {
+            g.setColor(new Color(30, 30, 50));
+            g.fill(new Ellipse2D.Double(bodyX - bodyW / 2, bodyY - bodyH / 2, bodyW, bodyH));
+            g.fill(new Ellipse2D.Double(headX - headSize / 2, headY - headSize / 2, headSize, headSize));
+            drawStarFixed(g, starX, starY, starSize, starPoints);
+
+            g.setColor(new Color(60, 60, 80));
+            g.setStroke(new BasicStroke(3));
+            g.draw(new Ellipse2D.Double(bodyX - bodyW / 2, bodyY - bodyH / 2, bodyW, bodyH));
+            g.draw(new Ellipse2D.Double(headX - headSize / 2, headY - headSize / 2, headSize, headSize));
+        } else {
+            g.setColor(new Color(255, 255, 255, 40));
+            for (int i = 0; i < 10; i++) {
+                int size = 40 + rand.nextInt(200);
+                g.fill(new Ellipse2D.Double(rand.nextInt(WIDTH), rand.nextInt(HEIGHT), size, size));
+            }
+
+            g.setColor(palette[1].brighter());
+            g.fill(new Ellipse2D.Double(bodyX - bodyW / 2, bodyY - bodyH / 2, bodyW, bodyH));
+            g.setColor(palette[0].brighter());
+            g.fill(new Ellipse2D.Double(headX - headSize / 2, headY - headSize / 2, headSize, headSize));
+
+            g.setColor(new Color(255, 220, 50, 220));
+            drawStarFixed(g, starX, starY, starSize, starPoints);
+
+            g.setColor(Color.WHITE);
+            int eyeSize = 20;
+            g.fill(new Ellipse2D.Double(headX - 35, headY - 15, eyeSize, eyeSize));
+            g.fill(new Ellipse2D.Double(headX + 15, headY - 15, eyeSize, eyeSize));
+            g.setColor(Color.BLACK);
+            g.fill(new Ellipse2D.Double(headX - 30, headY - 10, 10, 10));
+            g.fill(new Ellipse2D.Double(headX + 20, headY - 10, 10, 10));
+        }
+
+        g.dispose();
+        return img;
+    }
+
+    private static void drawStarFixed(Graphics2D g, int cx, int cy, int size, int points) {
+        Path2D path = new Path2D.Double();
+        for (int i = 0; i < points * 2; i++) {
+            double angle = Math.PI * i / points - Math.PI / 2;
+            double r = (i % 2 == 0) ? size : size * 0.4;
+            double x = cx + r * Math.cos(angle);
+            double y = cy + r * Math.sin(angle);
+            if (i == 0) path.moveTo(x, y);
+            else path.lineTo(x, y);
+        }
+        path.closePath();
+        g.fill(path);
     }
 
     private static void drawStar(Graphics2D g, int cx, int cy, int size, Random rand) {

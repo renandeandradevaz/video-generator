@@ -63,6 +63,12 @@
       "correctIndex": 1
     },
     {
+      "type": "who-is-the-character",
+      "text": "Quem é este personagem?",
+      "silhouetteImage": "silhouette_01.jpg",
+      "revealImage": "reveal_01.jpg"
+    },
+    {
       "type": "quiz",
       "text": "Quem ensinou o Rasengan para Naruto?",
       "image": "question_08.jpg",
@@ -82,6 +88,12 @@
       "correctImage": "correct_02.jpg",
       "incorrectImage": "incorrect_02.jpg",
       "repetitions": 9
+    },
+    {
+      "type": "who-is-the-character",
+      "text": "Quem é este personagem?",
+      "silhouetteImage": "silhouette_02.jpg",
+      "revealImage": "reveal_02.jpg"
     },
     {
       "type": "quiz",
