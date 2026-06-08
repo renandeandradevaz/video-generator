@@ -19,6 +19,8 @@ public class FrameRenderer {
     private final int height;
     private final File imagesDir;
     private final Map<String, BufferedImage> imageCache = new HashMap<>();
+    private final Font titleFont;
+    private final Font optionsFont;
 
     private static final Color BG_OVERLAY = new Color(0, 0, 0, 180);
     private static final Color OPTION_BG = new Color(255, 255, 255, 40);
@@ -41,6 +43,28 @@ public class FrameRenderer {
         this.width = width;
         this.height = height;
         this.imagesDir = imagesDir;
+        this.titleFont = loadFont("fonts/frankfurter-highlight-std.otf");
+        this.optionsFont = loadFont("fonts/handelson-five.otf");
+    }
+
+    private Font loadFont(String path) {
+        try {
+            File fontFile = new File(path);
+            if (fontFile.exists()) {
+                return Font.createFont(Font.TRUETYPE_FONT, fontFile);
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar fonte: " + path + " - " + e.getMessage());
+        }
+        return new Font("SansSerif", Font.PLAIN, 1);
+    }
+
+    private Font title(int size) {
+        return titleFont.deriveFont(Font.BOLD, (float) size);
+    }
+
+    private Font options(int size) {
+        return optionsFont.deriveFont(Font.PLAIN, (float) size);
     }
 
     public BufferedImage renderQuestionFrame(Question question, int questionNumber, int totalQuestions,
@@ -52,23 +76,24 @@ public class FrameRenderer {
         if ("find-the-error".equals(question.getType())) {
             drawSolidBackground(g);
             drawOverlay(g);
-            drawHeader(g, questionNumber, totalQuestions);
+
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, false);
         } else if ("who-is-the-character".equals(question.getType())) {
             drawBackground(g, question.getSilhouetteImage());
             drawOverlay(g);
-            drawHeader(g, questionNumber, totalQuestions);
+
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
         } else {
-            drawBackground(g, question.getImage());
+            drawBackground(g, "background.jpg");
             drawOverlay(g);
-            drawHeader(g, questionNumber, totalQuestions);
+
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
-            drawOptions(g, question.getOptions(), -1);
+            int optionsRight = drawOptions(g, question.getOptions(), -1, scale(100));
+            drawQuestionImage(g, question.getImage(), optionsRight);
         }
 
         g.dispose();
@@ -83,23 +108,24 @@ public class FrameRenderer {
         if ("find-the-error".equals(question.getType())) {
             drawSolidBackground(g);
             drawOverlay(g);
-            drawHeader(g, questionNumber, totalQuestions);
+
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, true);
         } else if ("who-is-the-character".equals(question.getType())) {
             drawBackground(g, question.getRevealImage());
             drawOverlay(g);
-            drawHeader(g, questionNumber, totalQuestions);
+
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
         } else {
-            drawBackground(g, question.getImage());
+            drawBackground(g, "background.jpg");
             drawOverlay(g);
-            drawHeader(g, questionNumber, totalQuestions);
+
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
-            drawOptions(g, question.getOptions(), question.getCorrectIndex());
+            int optionsRight = drawOptions(g, question.getOptions(), question.getCorrectIndex(), scale(100));
+            drawQuestionImage(g, question.getImage(), optionsRight);
         }
 
         g.dispose();
@@ -140,7 +166,7 @@ public class FrameRenderer {
         g.setColor(HEADER_BG);
         g.fillRect(0, 0, width, headerHeight);
 
-        g.setFont(new Font("SansSerif", Font.BOLD, scale(28)));
+        g.setFont(title(scale(28)));
         String headerText = "Pergunta " + questionNumber + " de " + totalQuestions;
         FontMetrics fm = g.getFontMetrics();
         int textX = (width - fm.stringWidth(headerText)) / 2;
@@ -168,7 +194,7 @@ public class FrameRenderer {
         g.setColor(fillColor);
         g.fill(new RoundRectangle2D.Double(barX, barY, fillWidth, barHeight, arcSize, arcSize));
 
-        g.setFont(new Font("SansSerif", Font.BOLD, scale(36)));
+        g.setFont(title(scale(36)));
         String timerText = String.valueOf((int) Math.ceil(secondsRemaining));
         FontMetrics fm = g.getFontMetrics();
         int timerX = (width - fm.stringWidth(timerText)) / 2;
@@ -190,7 +216,7 @@ public class FrameRenderer {
         g.setColor(TIMER_BAR_BG);
         g.fill(new RoundRectangle2D.Double(barX, barY, barWidth, barHeight, arcSize, arcSize));
 
-        g.setFont(new Font("SansSerif", Font.BOLD, scale(36)));
+        g.setFont(title(scale(36)));
         String timerText = "✓";
         FontMetrics fm = g.getFontMetrics();
         int timerX = (width - fm.stringWidth(timerText)) / 2;
@@ -211,7 +237,7 @@ public class FrameRenderer {
         g.setColor(QUESTION_BOX_BG);
         g.fill(new RoundRectangle2D.Double(boxX, boxY, boxWidth, boxHeight, arcSize, arcSize));
 
-        g.setFont(new Font("SansSerif", Font.BOLD, scale(36)));
+        g.setFont(title(scale(36)));
         FontMetrics fm = g.getFontMetrics();
 
         List<String> lines = wrapText(text, fm, boxWidth - padding * 2);
@@ -230,14 +256,50 @@ public class FrameRenderer {
         }
     }
 
-    private void drawOptions(Graphics2D g, List<String> options, int correctIndex) {
-        int optionWidth = width - scale(200);
-        int optionHeight = scale(80);
-        int gap = scale(18);
-        int startX = scale(100);
-        int startY = scale(340);
+    private void drawQuestionImage(Graphics2D g, String imageName, int imgStartX) {
+        BufferedImage img = loadImage(imageName);
+        int imgX = imgStartX;
+        int imgY = scale(340);
+        int imgW = width - imgStartX - scale(100);
+        int imgH = height - scale(140) - imgY;
+        int arcSize = scale(15);
 
-        g.setFont(new Font("SansSerif", Font.BOLD, scale(30)));
+        Shape clip = new RoundRectangle2D.Double(imgX, imgY, imgW, imgH, arcSize, arcSize);
+        Shape oldClip = g.getClip();
+        g.setClip(clip);
+
+        if (img != null) {
+            double scaleX = (double) imgW / img.getWidth();
+            double scaleY = (double) imgH / img.getHeight();
+            double sc = Math.max(scaleX, scaleY);
+            int scaledW = (int) (img.getWidth() * sc);
+            int scaledH = (int) (img.getHeight() * sc);
+            int drawX = imgX + (imgW - scaledW) / 2;
+            int drawY = imgY + (imgH - scaledH) / 2;
+            g.drawImage(img, drawX, drawY, scaledW, scaledH, null);
+        } else {
+            g.setColor(new Color(80, 80, 120));
+            g.fillRect(imgX, imgY, imgW, imgH);
+        }
+
+        g.setClip(oldClip);
+        g.setColor(OPTION_BORDER);
+        g.setStroke(new BasicStroke(scale(3)));
+        g.draw(new RoundRectangle2D.Double(imgX, imgY, imgW, imgH, arcSize, arcSize));
+    }
+
+    private int drawOptions(Graphics2D g, List<String> options, int correctIndex, int startX) {
+        int availableWidth = width - startX - scale(100);
+        int optionWidth = (int) (availableWidth * 0.70);
+        int startY = scale(340);
+        int endY = height - scale(140);
+        int availableHeight = endY - startY;
+        int gap = scale(18);
+        int optionHeight = (availableHeight - gap * (options.size() - 1)) / options.size();
+        int padding = scale(25);
+
+        Font font = options(scale(30));
+        g.setFont(font);
 
         for (int i = 0; i < options.size(); i++) {
             int y = startY + i * (optionHeight + gap);
@@ -266,14 +328,23 @@ public class FrameRenderer {
 
             FontMetrics fm = g.getFontMetrics();
             String label = OPTION_LETTERS[i] + ".  " + options.get(i);
-            int textX = startX + scale(25);
-            int textY = y + (optionHeight + fm.getAscent() - fm.getDescent()) / 2;
+            List<String> lines = wrapText(label, fm, optionWidth - padding * 2);
 
-            g.setColor(TEXT_SHADOW);
-            g.drawString(label, textX + 2, textY + 2);
-            g.setColor(TEXT_WHITE);
-            g.drawString(label, textX, textY);
+            int totalTextH = lines.size() * fm.getHeight();
+            int textStartY = y + (optionHeight - totalTextH) / 2 + fm.getAscent();
+
+            for (int l = 0; l < lines.size(); l++) {
+                int textX = startX + padding;
+                int textY = textStartY + l * fm.getHeight();
+
+                g.setColor(TEXT_SHADOW);
+                g.drawString(lines.get(l), textX + 2, textY + 2);
+                g.setColor(TEXT_WHITE);
+                g.drawString(lines.get(l), textX, textY);
+            }
         }
+
+        return startX + optionWidth + scale(25);
     }
 
     private BufferedImage loadImage(String imageName) {
@@ -389,7 +460,7 @@ public class FrameRenderer {
         } else {
             g.setColor(new Color(80, 80, 120));
             g.fill(new RoundRectangle2D.Double(x, y, w, h, scale(10), scale(10)));
-            g.setFont(new Font("SansSerif", Font.BOLD, scale(20)));
+            g.setFont(title(scale(20)));
             FontMetrics fm = g.getFontMetrics();
             String text = "?";
             g.setColor(TEXT_WHITE);
