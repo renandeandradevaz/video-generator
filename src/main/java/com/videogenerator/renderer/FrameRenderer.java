@@ -74,7 +74,7 @@ public class FrameRenderer {
         setupRenderingHints(g);
 
         if ("find-the-error".equals(question.getType())) {
-            drawSolidBackground(g);
+            drawBackground(g, "background-3.jpg");
             drawOverlay(g);
 
             drawTimer(g, secondsRemaining, totalSeconds);
@@ -107,7 +107,7 @@ public class FrameRenderer {
         setupRenderingHints(g);
 
         if ("find-the-error".equals(question.getType())) {
-            drawSolidBackground(g);
+            drawBackground(g, "background-3.jpg");
             drawOverlay(g);
 
             drawTimerFinished(g);
