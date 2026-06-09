@@ -23,19 +23,20 @@ public class FrameRenderer {
     private final Font optionsFont;
 
     private static final Color BG_OVERLAY = new Color(0, 0, 0, 180);
-    private static final Color OPTION_BG = new Color(0, 0, 0, 80);
-    private static final Color OPTION_BORDER = new Color(255, 255, 255, 60);
-    private static final Color OPTION_SHADOW = new Color(0, 0, 0, 80);
-    private static final Color CORRECT_BG = new Color(46, 204, 113, 200);
+    private static final Color OPTION_BG = new Color(255, 255, 255, 255);
+    private static final Color OPTION_BORDER = new Color(200, 200, 200);
+    private static final Color OPTION_SHADOW = new Color(0, 0, 0, 60);
+    private static final Color CORRECT_BG = new Color(46, 204, 113);
     private static final Color CORRECT_BORDER = new Color(39, 174, 96);
-    private static final Color WRONG_BG = new Color(231, 76, 60, 120);
-    private static final Color WRONG_BORDER = new Color(192, 57, 43, 150);
+    private static final Color WRONG_BG = new Color(231, 76, 60);
+    private static final Color WRONG_BORDER = new Color(192, 57, 43);
     private static final Color TIMER_BAR_BG = new Color(255, 255, 255, 50);
     private static final Color TIMER_BAR_FILL = new Color(52, 152, 219);
     private static final Color TIMER_BAR_URGENT = new Color(231, 76, 60);
     private static final Color TEXT_WHITE = new Color(255, 255, 255);
+    private static final Color TEXT_BLACK = new Color(30, 30, 30);
     private static final Color TEXT_SHADOW = new Color(0, 0, 0, 150);
-    private static final Color QUESTION_BOX_BG = new Color(0, 0, 0, 140);
+    private static final Color QUESTION_BOX_BG = new Color(255, 255, 255);
     private static final Color HEADER_BG = new Color(0, 0, 0, 120);
 
     private static final String[] OPTION_LETTERS = {"A", "B", "C", "D"};
@@ -241,9 +242,9 @@ public class FrameRenderer {
     }
 
     private void drawQuestionText(Graphics2D g, String text) {
-        int boxX = scale(80);
+        int boxWidth = (int) (width * 0.60);
+        int boxX = (width - boxWidth) / 2;
         int boxY = scale(100);
-        int boxWidth = width - scale(160);
         int boxHeight = scale(180);
         int arcSize = scale(20);
         int padding = scale(30);
@@ -263,9 +264,7 @@ public class FrameRenderer {
             int lineX = boxX + (boxWidth - fm.stringWidth(line)) / 2;
             int lineY = startY + i * fm.getHeight();
 
-            g.setColor(TEXT_SHADOW);
-            g.drawString(line, lineX + 2, lineY + 2);
-            g.setColor(TEXT_WHITE);
+            g.setColor(TEXT_BLACK);
             g.drawString(line, lineX, lineY);
         }
     }
@@ -350,13 +349,12 @@ public class FrameRenderer {
             int totalTextH = lines.size() * fm.getHeight();
             int textStartY = y + (optionHeight - totalTextH) / 2 + fm.getAscent();
 
+            Color textColor = (correctIndex >= 0) ? TEXT_WHITE : TEXT_BLACK;
             for (int l = 0; l < lines.size(); l++) {
                 int textX = startX + padding;
                 int textY = textStartY + l * fm.getHeight();
 
-                g.setColor(TEXT_SHADOW);
-                g.drawString(lines.get(l), textX + 2, textY + 2);
-                g.setColor(TEXT_WHITE);
+                g.setColor(textColor);
                 g.drawString(lines.get(l), textX, textY);
             }
         }
