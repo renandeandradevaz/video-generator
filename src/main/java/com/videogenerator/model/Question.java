@@ -7,7 +7,7 @@ public class Question {
     private String text;
     private String image;
     private List<String> options;
-    private int correctIndex;
+    private Integer correctIndex;
     private String correctImage;
     private String incorrectImage;
     private Integer repetitions;
@@ -30,8 +30,12 @@ public class Question {
         return options;
     }
 
+    public boolean hasCorrectAnswer() {
+        return correctIndex != null;
+    }
+
     public int getCorrectIndex() {
-        return correctIndex;
+        return correctIndex == null ? -1 : correctIndex;
     }
 
     public String getCorrectImage() {

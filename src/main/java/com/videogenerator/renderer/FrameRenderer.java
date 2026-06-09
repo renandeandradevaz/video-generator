@@ -91,8 +91,16 @@ public class FrameRenderer {
 
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
-            int optionsRight = drawOptions(g, question.getOptions(), -1, scale(100));
-            drawQuestionImage(g, question.getImage(), optionsRight);
+            boolean hasImage = question.getImage() != null && !question.getImage().isEmpty();
+            if (hasImage) {
+                int optionWidth = (int) ((width - scale(200)) * 0.70);
+                int optionsRight = drawOptions(g, question.getOptions(), -1, scale(100), optionWidth);
+                drawQuestionImage(g, question.getImage(), optionsRight);
+            } else {
+                int optionWidth = (int) (width * 0.40);
+                int startX = (width - optionWidth) / 2;
+                drawOptions(g, question.getOptions(), -1, startX, optionWidth);
+            }
         }
 
         g.dispose();
@@ -121,8 +129,17 @@ public class FrameRenderer {
 
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
-            int optionsRight = drawOptions(g, question.getOptions(), question.getCorrectIndex(), scale(100));
-            drawQuestionImage(g, question.getImage(), optionsRight);
+            boolean hasImage = question.getImage() != null && !question.getImage().isEmpty();
+            int correctIdx = question.hasCorrectAnswer() ? question.getCorrectIndex() : -1;
+            if (hasImage) {
+                int optionWidth = (int) ((width - scale(200)) * 0.70);
+                int optionsRight = drawOptions(g, question.getOptions(), correctIdx, scale(100), optionWidth);
+                drawQuestionImage(g, question.getImage(), optionsRight);
+            } else {
+                int optionWidth = (int) (width * 0.40);
+                int startX = (width - optionWidth) / 2;
+                drawOptions(g, question.getOptions(), correctIdx, startX, optionWidth);
+            }
         }
 
         g.dispose();
@@ -285,9 +302,7 @@ public class FrameRenderer {
         g.draw(new RoundRectangle2D.Double(imgX, imgY, imgW, imgH, arcSize, arcSize));
     }
 
-    private int drawOptions(Graphics2D g, List<String> options, int correctIndex, int startX) {
-        int availableWidth = width - startX - scale(100);
-        int optionWidth = (int) (availableWidth * 0.70);
+    private int drawOptions(Graphics2D g, List<String> options, int correctIndex, int startX, int optionWidth) {
         int startY = scale(340);
         int endY = height - scale(140);
         int availableHeight = endY - startY;

@@ -60,7 +60,7 @@ public class App {
                 Question question = quiz.getQuestions().get(q);
                 int questionNum = q + 1;
 
-                System.out.print("Pergunta " + questionNum + "/" + totalQuestions + ": ");
+                System.out.print("Pergunta " + questionNum + "/" + totalQuestions);
 
                 for (int f = 0; f < questionFrames; f++) {
                     double secondsRemaining = (double) (questionFrames - f) / fps;
