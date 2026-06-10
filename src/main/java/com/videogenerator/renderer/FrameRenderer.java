@@ -455,12 +455,22 @@ public class FrameRenderer {
 
         int gap = scale(12);
 
+        BufferedImage correctImg = loadImage(question.getCorrectImage());
+        BufferedImage incorrectImg = loadImage(question.getIncorrectImage());
+
+        // Proporção real das imagens (mantida ao desenhar, sem esticar).
+        BufferedImage refImg = correctImg != null ? correctImg : incorrectImg;
+        double imgAspect = (refImg != null)
+                ? (double) refImg.getWidth() / refImg.getHeight()
+                : 1.0;
+
         // Escolhe a melhor fatoração linhas x colunas que preenche o grid
-        // por completo (sem buracos) e maximiza o tamanho das imagens,
-        // favorecendo a distribuição horizontal da tela 16:9.
+        // por completo (sem buracos) e maximiza o tamanho das imagens
+        // respeitando a proporção, favorecendo a distribuição horizontal.
         int cols = total;
         int rows = 1;
-        int imgSize = 0;
+        int imgW = 0;
+        int imgH = 0;
         for (int c = 1; c <= total; c++) {
             if (total % c != 0) {
                 continue;
@@ -468,27 +478,27 @@ public class FrameRenderer {
             int r = total / c;
             int cw = (availableWidth - gap * (c - 1)) / c;
             int ch = (availableHeight - gap * (r - 1)) / r;
-            int candidate = Math.min(cw, ch);
-            if (candidate > imgSize) {
-                imgSize = candidate;
+            // Maior imagem com a proporção dada que cabe na célula cw x ch.
+            int w = (int) Math.min(cw, ch * imgAspect);
+            int h = (int) (w / imgAspect);
+            if (h > imgH) {
+                imgW = w;
+                imgH = h;
                 cols = c;
                 rows = r;
             }
         }
 
-        int totalGridWidth = cols * imgSize + (cols - 1) * gap;
-        int totalGridHeight = rows * imgSize + (rows - 1) * gap;
+        int totalGridWidth = cols * imgW + (cols - 1) * gap;
+        int totalGridHeight = rows * imgH + (rows - 1) * gap;
         int offsetX = gridLeft + (availableWidth - totalGridWidth) / 2;
         int offsetY = gridTop + (availableHeight - totalGridHeight) / 2;
-
-        BufferedImage correctImg = loadImage(question.getCorrectImage());
-        BufferedImage incorrectImg = loadImage(question.getIncorrectImage());
 
         for (int i = 0; i < total; i++) {
             int row = i / cols;
             int col = i % cols;
-            int x = offsetX + col * (imgSize + gap);
-            int y = offsetY + row * (imgSize + gap);
+            int x = offsetX + col * (imgW + gap);
+            int y = offsetY + row * (imgH + gap);
 
             boolean isIncorrect = (i == incorrectPos);
             BufferedImage img = isIncorrect ? incorrectImg : correctImg;
@@ -496,22 +506,23 @@ public class FrameRenderer {
             if (showAnswer && !isIncorrect) {
                 Composite original = g.getComposite();
                 g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
-                drawScaledImage(g, img, x, y, imgSize, imgSize);
+                drawScaledImage(g, img, x, y, imgW, imgH);
                 g.setComposite(original);
                 g.setColor(OPTION_BORDER);
                 g.setStroke(new BasicStroke(scale(2)));
-                g.draw(new RoundRectangle2D.Double(x, y, imgSize, imgSize, scale(10), scale(10)));
+                g.draw(new RoundRectangle2D.Double(x, y, imgW, imgH, scale(10), scale(10)));
             } else if (showAnswer && isIncorrect) {
-                int zoom = scale(8);
-                drawScaledImage(g, img, x - zoom, y - zoom, imgSize + zoom * 2, imgSize + zoom * 2);
+                int zoomX = scale(8);
+                int zoomY = (int) (zoomX / imgAspect);
+                drawScaledImage(g, img, x - zoomX, y - zoomY, imgW + zoomX * 2, imgH + zoomY * 2);
                 g.setColor(CORRECT_BG);
                 g.setStroke(new BasicStroke(scale(5)));
-                g.draw(new RoundRectangle2D.Double(x - zoom, y - zoom, imgSize + zoom * 2, imgSize + zoom * 2, scale(12), scale(12)));
+                g.draw(new RoundRectangle2D.Double(x - zoomX, y - zoomY, imgW + zoomX * 2, imgH + zoomY * 2, scale(12), scale(12)));
             } else {
-                drawScaledImage(g, img, x, y, imgSize, imgSize);
+                drawScaledImage(g, img, x, y, imgW, imgH);
                 g.setColor(OPTION_BORDER);
                 g.setStroke(new BasicStroke(scale(2)));
-                g.draw(new RoundRectangle2D.Double(x, y, imgSize, imgSize, scale(10), scale(10)));
+                g.draw(new RoundRectangle2D.Double(x, y, imgW, imgH, scale(10), scale(10)));
             }
         }
     }
