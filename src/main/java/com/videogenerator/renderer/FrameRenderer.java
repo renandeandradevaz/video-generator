@@ -441,24 +441,40 @@ public class FrameRenderer {
 
     private void drawImageGrid(Graphics2D g, Question question, int questionIndex, boolean showAnswer) {
         int total = question.getRepetitions();
-        int cols = (int) Math.ceil(Math.sqrt(total));
-        int rows = (int) Math.ceil((double) total / cols);
 
         Random rand = new Random(questionIndex * 31L + 7);
         int incorrectPos = rand.nextInt(total);
 
         int gridTop = scale(310);
         int gridBottom = height - scale(110);
-        int gridLeft = scale(100);
-        int gridRight = width - scale(100);
+        int gridLeft = scale(80);
+        int gridRight = width - scale(80);
 
         int availableWidth = gridRight - gridLeft;
         int availableHeight = gridBottom - gridTop;
 
         int gap = scale(12);
-        int cellWidth = (availableWidth - gap * (cols - 1)) / cols;
-        int cellHeight = (availableHeight - gap * (rows - 1)) / rows;
-        int imgSize = Math.min(cellWidth, cellHeight);
+
+        // Escolhe a melhor fatoração linhas x colunas que preenche o grid
+        // por completo (sem buracos) e maximiza o tamanho das imagens,
+        // favorecendo a distribuição horizontal da tela 16:9.
+        int cols = total;
+        int rows = 1;
+        int imgSize = 0;
+        for (int c = 1; c <= total; c++) {
+            if (total % c != 0) {
+                continue;
+            }
+            int r = total / c;
+            int cw = (availableWidth - gap * (c - 1)) / c;
+            int ch = (availableHeight - gap * (r - 1)) / r;
+            int candidate = Math.min(cw, ch);
+            if (candidate > imgSize) {
+                imgSize = candidate;
+                cols = c;
+                rows = r;
+            }
+        }
 
         int totalGridWidth = cols * imgSize + (cols - 1) * gap;
         int totalGridHeight = rows * imgSize + (rows - 1) * gap;
