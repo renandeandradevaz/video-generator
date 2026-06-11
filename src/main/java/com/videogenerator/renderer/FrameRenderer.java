@@ -81,6 +81,12 @@ public class FrameRenderer {
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, false);
+        } else if ("true-or-false".equals(question.getType())) {
+            drawBackground(g, "background-2.jpg");
+
+            drawTimer(g, secondsRemaining, totalSeconds);
+            drawQuestionText(g, question.getText());
+            // Espaço do meio vazio durante a pergunta.
         } else if ("who-is-the-character".equals(question.getType())) {
             drawBackground(g, "background-2.jpg");
 
@@ -119,6 +125,13 @@ public class FrameRenderer {
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawImageGrid(g, question, questionIndex, true);
+        } else if ("true-or-false".equals(question.getType())) {
+            drawBackground(g, "background-2.jpg");
+
+            drawTimerFinished(g);
+            drawQuestionText(g, question.getText());
+            boolean isTrue = "true".equalsIgnoreCase(question.getAnswer());
+            drawCenteredTransparentImage(g, isTrue ? "true.jpeg" : "false.jpeg");
         } else if ("who-is-the-character".equals(question.getType())) {
             drawBackground(g, "background-2.jpg");
 
@@ -390,6 +403,97 @@ public class FrameRenderer {
             g.setColor(OPTION_BORDER);
             g.setStroke(new BasicStroke(scale(3)));
             g.draw(new RoundRectangle2D.Double(x, y, scaledW, scaledH, arcSize, arcSize));
+        }
+    }
+
+    private void drawCenteredTransparentImage(Graphics2D g, String imageName) {
+        BufferedImage img = loadTransparentImage(imageName);
+        if (img == null) {
+            return;
+        }
+        int areaTop = scale(310);
+        int areaBottom = height - scale(140);
+        int areaLeft = scale(100);
+        int areaRight = width - scale(100);
+        int areaW = areaRight - areaLeft;
+        int areaH = areaBottom - areaTop;
+
+        double scaleX = (double) areaW / img.getWidth();
+        double scaleY = (double) areaH / img.getHeight();
+        double sc = Math.min(scaleX, scaleY);
+        int scaledW = (int) (img.getWidth() * sc);
+        int scaledH = (int) (img.getHeight() * sc);
+        int x = areaLeft + (areaW - scaledW) / 2;
+        int y = areaTop + (areaH - scaledH) / 2;
+        g.drawImage(img, x, y, scaledW, scaledH, null);
+    }
+
+    // Carrega a imagem e torna o fundo (xadrez cinza/branco) transparente via
+    // flood-fill a partir das bordas. O anel colorido do ícone bloqueia o
+    // preenchimento, preservando o branco interno (✓ / ✗).
+    private BufferedImage loadTransparentImage(String imageName) {
+        String key = "transparent:" + imageName;
+        if (imageCache.containsKey(key)) {
+            return imageCache.get(key);
+        }
+        BufferedImage src = loadImage(imageName);
+        BufferedImage out = src == null ? null : makeBackgroundTransparent(src);
+        imageCache.put(key, out);
+        return out;
+    }
+
+    private BufferedImage makeBackgroundTransparent(BufferedImage src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        out.getGraphics().drawImage(src, 0, 0, null);
+
+        boolean[] visited = new boolean[w * h];
+        java.util.ArrayDeque<int[]> queue = new java.util.ArrayDeque<>();
+
+        for (int x = 0; x < w; x++) {
+            enqueueIfBackground(out, x, 0, visited, queue);
+            enqueueIfBackground(out, x, h - 1, visited, queue);
+        }
+        for (int y = 0; y < h; y++) {
+            enqueueIfBackground(out, 0, y, visited, queue);
+            enqueueIfBackground(out, w - 1, y, visited, queue);
+        }
+
+        while (!queue.isEmpty()) {
+            int[] p = queue.poll();
+            int px = p[0];
+            int py = p[1];
+            out.setRGB(px, py, 0x00000000);
+            enqueueIfBackground(out, px + 1, py, visited, queue);
+            enqueueIfBackground(out, px - 1, py, visited, queue);
+            enqueueIfBackground(out, px, py + 1, visited, queue);
+            enqueueIfBackground(out, px, py - 1, visited, queue);
+        }
+        return out;
+    }
+
+    private void enqueueIfBackground(BufferedImage img, int x, int y, boolean[] visited, java.util.ArrayDeque<int[]> queue) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+        if (x < 0 || y < 0 || x >= w || y >= h) {
+            return;
+        }
+        int idx = y * w + x;
+        if (visited[idx]) {
+            return;
+        }
+        visited[idx] = true;
+        int rgb = img.getRGB(x, y);
+        int r = (rgb >> 16) & 0xFF;
+        int gC = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        int max = Math.max(r, Math.max(gC, b));
+        int min = Math.min(r, Math.min(gC, b));
+        // Acinzentado (baixa saturação) e claro = xadrez de fundo.
+        boolean isBackground = (max - min) <= 45 && max >= 150;
+        if (isBackground) {
+            queue.add(new int[]{x, y});
         }
     }
 

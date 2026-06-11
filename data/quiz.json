@@ -7,11 +7,9 @@
   "answerRevealDurationSeconds": 3,
   "questions": [
     {
-      "type": "quiz",
-      "text": "Qual é o nome do jutsu mais icônico de Naruto Uzumaki?",
-      "image": "question_01.jpg",
-      "options": ["Chidori", "Rasengan", "Amaterasu", "Byakugan"],
-      "correctIndex": 1
+      "type": "true-or-false",
+      "text": "Naruro é humano",
+      "answer": "verdadeiro"
     },
     {
       "type": "quiz",
@@ -101,6 +99,16 @@
       "image": "question_10.jpg",
       "options": ["Rasengan", "Selo Amaldiçoado", "Kirin", "Chidori"],
       "correctIndex": 2
+    },
+    {
+      "type": "true-or-false",
+      "text": "Naruro é humano",
+      "answer": "true"
+    },
+    {
+      "type": "true-or-false",
+      "text": "Sakura é menino",
+      "answer": "false"
     }
   ]
 }
