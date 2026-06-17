@@ -95,6 +95,12 @@ public class FrameRenderer {
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawCenteredImage(g, question.getSilhouetteImage());
+        } else if ("image-quiz".equals(question.getType())) {
+            drawBackground(g, "background.jpg");
+
+            drawTimer(g, secondsRemaining, totalSeconds);
+            drawQuestionText(g, question.getText());
+            drawImageOptions(g, question, -1);
         } else {
             drawBackground(g, "background.jpg");
 
@@ -140,6 +146,12 @@ public class FrameRenderer {
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawCenteredImage(g, question.getRevealImage());
+        } else if ("image-quiz".equals(question.getType())) {
+            drawBackground(g, "background.jpg");
+
+            drawTimerFinished(g);
+            drawQuestionText(g, question.getText());
+            drawImageOptions(g, question, question.hasCorrectAnswer() ? question.getCorrectIndex() : -1);
         } else {
             drawBackground(g, "background.jpg");
 
@@ -633,6 +645,99 @@ public class FrameRenderer {
                 g.setColor(OPTION_BORDER);
                 g.setStroke(new BasicStroke(scale(2)));
                 g.draw(new RoundRectangle2D.Double(x, y, imgW, imgH, scale(10), scale(10)));
+            }
+        }
+    }
+
+    private void drawImageOptions(Graphics2D g, Question question, int highlightIndex) {
+        List<String> optionImages = question.getOptionImages();
+        if (optionImages == null || optionImages.isEmpty()) {
+            return;
+        }
+        int total = optionImages.size();
+
+        int gridTop = scale(310);
+        int gridBottom = height - scale(110);
+        int gridLeft = scale(80);
+        int gridRight = width - scale(80);
+
+        int availableWidth = gridRight - gridLeft;
+        int availableHeight = gridBottom - gridTop;
+
+        int gap = scale(40);
+
+        BufferedImage[] images = new BufferedImage[total];
+        BufferedImage refImg = null;
+        for (int i = 0; i < total; i++) {
+            images[i] = loadImage(optionImages.get(i));
+            if (refImg == null && images[i] != null) {
+                refImg = images[i];
+            }
+        }
+
+        // Proporção real das imagens (mantida ao desenhar, sem esticar).
+        double imgAspect = (refImg != null)
+                ? (double) refImg.getWidth() / refImg.getHeight()
+                : 1.0;
+
+        // Escolhe a melhor fatoração linhas x colunas que maximiza o tamanho
+        // das imagens respeitando a proporção, favorecendo a distribuição
+        // horizontal. Diferente do find-the-error, aqui aceitamos a última
+        // linha incompleta (ex.: 3 alternativas em 2 colunas).
+        int cols = total;
+        int rows = 1;
+        int imgW = 0;
+        int imgH = 0;
+        for (int c = 1; c <= total; c++) {
+            int r = (int) Math.ceil((double) total / c);
+            int cw = (availableWidth - gap * (c - 1)) / c;
+            int ch = (availableHeight - gap * (r - 1)) / r;
+            int w = (int) Math.min(cw, ch * imgAspect);
+            int h = (int) (w / imgAspect);
+            if (h > imgH) {
+                imgW = w;
+                imgH = h;
+                cols = c;
+                rows = r;
+            }
+        }
+
+        int offsetY = gridTop + (availableHeight - (rows * imgH + (rows - 1) * gap)) / 2;
+
+        for (int i = 0; i < total; i++) {
+            int row = i / cols;
+            int col = i % cols;
+            // Quantidade de imagens nesta linha (a última pode ter menos).
+            int itemsInRow = Math.min(cols, total - row * cols);
+            int rowWidth = itemsInRow * imgW + (itemsInRow - 1) * gap;
+            int rowLeft = gridLeft + (availableWidth - rowWidth) / 2;
+            int x = rowLeft + col * (imgW + gap);
+            int y = offsetY + row * (imgH + gap);
+
+            boolean isCorrect = (i == highlightIndex);
+
+            if (highlightIndex >= 0 && !isCorrect) {
+                // Esmaece as alternativas erradas na revelação.
+                Composite original = g.getComposite();
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
+                drawScaledImage(g, images[i], x, y, imgW, imgH);
+                g.setComposite(original);
+                g.setColor(OPTION_BORDER);
+                g.setStroke(new BasicStroke(scale(2)));
+                g.draw(new RoundRectangle2D.Double(x, y, imgW, imgH, scale(12), scale(12)));
+            } else if (isCorrect) {
+                // Destaca a correta com leve zoom e borda verde.
+                int zoomX = scale(12);
+                int zoomY = (int) (zoomX / imgAspect);
+                drawScaledImage(g, images[i], x - zoomX, y - zoomY, imgW + zoomX * 2, imgH + zoomY * 2);
+                g.setColor(CORRECT_BG);
+                g.setStroke(new BasicStroke(scale(6)));
+                g.draw(new RoundRectangle2D.Double(x - zoomX, y - zoomY, imgW + zoomX * 2, imgH + zoomY * 2, scale(14), scale(14)));
+            } else {
+                drawScaledImage(g, images[i], x, y, imgW, imgH);
+                g.setColor(OPTION_BORDER);
+                g.setStroke(new BasicStroke(scale(2)));
+                g.draw(new RoundRectangle2D.Double(x, y, imgW, imgH, scale(12), scale(12)));
             }
         }
     }

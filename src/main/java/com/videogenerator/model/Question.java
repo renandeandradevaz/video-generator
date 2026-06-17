@@ -7,6 +7,7 @@ public class Question {
     private String text;
     private String image;
     private List<String> options;
+    private List<String> optionImages;
     private Integer correctIndex;
     private String correctImage;
     private String incorrectImage;
@@ -29,6 +30,10 @@ public class Question {
 
     public List<String> getOptions() {
         return options;
+    }
+
+    public List<String> getOptionImages() {
+        return optionImages;
     }
 
     public boolean hasCorrectAnswer() {
