@@ -7,6 +7,12 @@
   "answerRevealDurationSeconds": 3,
   "questions": [
     {
+      "type": "image-quiz",
+      "text": "Qual destes personagens é o Kakashi?",
+      "optionImages": ["opt_a.jpg", "opt_b.jpg", "opt_c.jpg", "opt_d.jpg"],
+      "correctIndex": 2
+    },
+    {
       "type": "true-or-false",
       "text": "Naruro é humano",
       "answer": "verdadeiro"
