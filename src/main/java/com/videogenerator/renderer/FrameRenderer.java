@@ -17,7 +17,8 @@ public class FrameRenderer {
 
     private final int width;
     private final int height;
-    private final File imagesDir;
+    private final File customImagesDir;
+    private final File defaultImagesDir;
     private final Map<String, BufferedImage> imageCache = new HashMap<>();
     private final Font titleFont;
     private final Font optionsFont;
@@ -44,7 +45,8 @@ public class FrameRenderer {
     public FrameRenderer(int width, int height, File imagesDir) {
         this.width = width;
         this.height = height;
-        this.imagesDir = imagesDir;
+        this.customImagesDir = new File(imagesDir, "custom");
+        this.defaultImagesDir = new File(imagesDir, "default");
         this.titleFont = loadFont("fonts/frankfurter-highlight-std.otf");
         this.optionsFont = loadFont("fonts/handelson-five.otf");
     }
@@ -502,7 +504,11 @@ public class FrameRenderer {
             return imageCache.get(imageName);
         }
         try {
-            File file = new File(imagesDir, imageName);
+            // Imagens customizadas têm prioridade sobre as padrão.
+            File file = new File(customImagesDir, imageName);
+            if (!file.exists()) {
+                file = new File(defaultImagesDir, imageName);
+            }
             if (file.exists()) {
                 BufferedImage img = ImageIO.read(file);
                 imageCache.put(imageName, img);

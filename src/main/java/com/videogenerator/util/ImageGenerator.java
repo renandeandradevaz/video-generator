@@ -28,7 +28,7 @@ public class ImageGenerator {
     };
 
     public static void main(String[] args) throws IOException {
-        File outputDir = new File(args.length > 0 ? args[0] : "images");
+        File outputDir = new File(args.length > 0 ? args[0] : "images/custom");
         outputDir.mkdirs();
 
         for (int i = 0; i < 10; i++) {
