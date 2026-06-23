@@ -115,6 +115,15 @@
       "type": "true-or-false",
       "text": "Sakura é menino",
       "answer": "false"
+    },
+    {
+      "type": "surprise-gift",
+      "text": "Escolha a entrada da floresta",
+      "optionImages": [
+        "Arco de flores mágicas.png",
+        "Portal de folhas brilhantes.png",
+        "Túnel secreto escondido em uma árvore gigante.png"
+      ]
     }
   ]
 }
