@@ -101,6 +101,12 @@ public class FrameRenderer {
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
             drawImageOptions(g, question, -1);
+        } else if ("surprise-gift".equals(question.getType())) {
+            drawBackground(g, "background-3.jpg");
+
+            drawTimer(g, secondsRemaining, totalSeconds);
+            drawQuestionText(g, question.getText());
+            drawSurpriseOptions(g, question, false);
         } else {
             drawBackground(g, "background.jpg");
 
@@ -152,6 +158,12 @@ public class FrameRenderer {
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
             drawImageOptions(g, question, question.hasCorrectAnswer() ? question.getCorrectIndex() : -1);
+        } else if ("surprise-gift".equals(question.getType())) {
+            drawBackground(g, "background-3.jpg");
+
+            drawTimerFinished(g);
+            drawQuestionText(g, question.getText());
+            drawSurpriseOptions(g, question, true);
         } else {
             drawBackground(g, "background.jpg");
 
@@ -654,7 +666,32 @@ public class FrameRenderer {
         if (optionImages == null || optionImages.isEmpty()) {
             return;
         }
-        int total = optionImages.size();
+        BufferedImage[] images = new BufferedImage[optionImages.size()];
+        for (int i = 0; i < images.length; i++) {
+            images[i] = loadImage(optionImages.get(i));
+        }
+        drawImageOptionsGrid(g, images, highlightIndex);
+    }
+
+    // surprise-gift: a última alternativa é o "presente surpresa". Durante o
+    // timer ela fica escondida atrás de surprise.png; na revelação trocamos pela
+    // imagem real, sem destaque (todas as imagens ficam visíveis normalmente).
+    private void drawSurpriseOptions(Graphics2D g, Question question, boolean reveal) {
+        List<String> optionImages = question.getOptionImages();
+        if (optionImages == null || optionImages.isEmpty()) {
+            return;
+        }
+        int last = optionImages.size() - 1;
+        BufferedImage[] images = new BufferedImage[optionImages.size()];
+        for (int i = 0; i < images.length; i++) {
+            String name = (i == last && !reveal) ? "surprise.png" : optionImages.get(i);
+            images[i] = loadImage(name);
+        }
+        drawImageOptionsGrid(g, images, -1);
+    }
+
+    private void drawImageOptionsGrid(Graphics2D g, BufferedImage[] images, int highlightIndex) {
+        int total = images.length;
 
         int gridTop = scale(310);
         int gridBottom = height - scale(110);
@@ -666,12 +703,11 @@ public class FrameRenderer {
 
         int gap = scale(40);
 
-        BufferedImage[] images = new BufferedImage[total];
         BufferedImage refImg = null;
-        for (int i = 0; i < total; i++) {
-            images[i] = loadImage(optionImages.get(i));
-            if (refImg == null && images[i] != null) {
-                refImg = images[i];
+        for (BufferedImage img : images) {
+            if (img != null) {
+                refImg = img;
+                break;
             }
         }
 
