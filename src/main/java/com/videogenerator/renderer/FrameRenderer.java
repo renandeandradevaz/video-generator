@@ -96,7 +96,7 @@ public class FrameRenderer {
             drawQuestionText(g, question.getText());
             drawCenteredImage(g, question.getSilhouetteImage());
         } else if ("image-quiz".equals(question.getType())) {
-            drawBackground(g, "background.jpg");
+            drawBackground(g, "background-3.jpg");
 
             drawTimer(g, secondsRemaining, totalSeconds);
             drawQuestionText(g, question.getText());
@@ -147,7 +147,7 @@ public class FrameRenderer {
             drawQuestionText(g, question.getText());
             drawCenteredImage(g, question.getRevealImage());
         } else if ("image-quiz".equals(question.getType())) {
-            drawBackground(g, "background.jpg");
+            drawBackground(g, "background-3.jpg");
 
             drawTimerFinished(g);
             drawQuestionText(g, question.getText());
