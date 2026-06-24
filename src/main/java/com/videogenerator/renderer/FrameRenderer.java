@@ -118,7 +118,7 @@ public class FrameRenderer {
                 int optionsRight = drawOptions(g, question.getOptions(), -1, scale(100), optionWidth);
                 drawQuestionImage(g, question.getImage(), optionsRight);
             } else {
-                int optionWidth = (int) (width * 0.40);
+                int optionWidth = (int) (width * (isVertical() ? 0.62 : 0.40));
                 int startX = (width - optionWidth) / 2;
                 drawOptions(g, question.getOptions(), -1, startX, optionWidth);
             }
@@ -176,7 +176,7 @@ public class FrameRenderer {
                 int optionsRight = drawOptions(g, question.getOptions(), correctIdx, scale(100), optionWidth);
                 drawQuestionImage(g, question.getImage(), optionsRight);
             } else {
-                int optionWidth = (int) (width * 0.40);
+                int optionWidth = (int) (width * (isVertical() ? 0.62 : 0.40));
                 int startX = (width - optionWidth) / 2;
                 drawOptions(g, question.getOptions(), correctIdx, startX, optionWidth);
             }
@@ -794,5 +794,10 @@ public class FrameRenderer {
 
     private int scale(int value) {
         return (int) (value * (height / 1080.0));
+    }
+
+    // Vídeos verticais (ex.: TikTok 1080x1920) ganham alternativas mais largas.
+    private boolean isVertical() {
+        return height > width;
     }
 }
